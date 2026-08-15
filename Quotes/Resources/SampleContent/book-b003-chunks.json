@@ -1,0 +1,96 @@
+[
+  {
+    "id": "b003-c001",
+    "bookId": "b003",
+    "order": 0,
+    "title": "On Other People",
+    "paragraphs": [
+      {
+        "id": "b003-c001-p001",
+        "order": 0,
+        "sentences": [
+          {
+            "id": "b003-c001-p001-s001",
+            "order": 0,
+            "text": "Begin the morning by saying to thyself, I shall meet with the busybody, the ungrateful, the arrogant, the deceitful, the envious, the unsocial.",
+            "translations": { "ko": "아침을 시작하며 스스로에게 이렇게 말하라. 나는 오늘 참견하기 좋아하는 자, 은혜를 모르는 자, 오만한 자, 속이는 자, 시기하는 자, 어울리지 못하는 자를 만나게 되리라." }
+          },
+          {
+            "id": "b003-c001-p001-s002",
+            "order": 1,
+            "text": "All these things happen to them by reason of their ignorance of what is good and evil.",
+            "translations": { "ko": "이 모든 일은 그들이 선과 악이 무엇인지 알지 못하는 무지에서 비롯된다." }
+          }
+        ]
+      },
+      {
+        "id": "b003-c001-p002",
+        "order": 1,
+        "sentences": [
+          {
+            "id": "b003-c001-p002-s001",
+            "order": 0,
+            "text": "But I, who have seen the nature of the good that it is beautiful, and of the bad that it is ugly, cannot be injured by any of them.",
+            "translations": { "ko": "그러나 선의 본성이 아름답고 악의 본성이 추하다는 것을 본 나는, 그들 중 누구에게서도 해를 입을 수 없다." }
+          },
+          {
+            "id": "b003-c001-p002-s002",
+            "order": 1,
+            "text": "For no one can fix on me what is ugly, nor can I be angry with my kinsman.",
+            "translations": { "ko": "그 누구도 내게 추함을 씌울 수 없으며, 나 또한 나의 이웃에게 화를 낼 수 없기 때문이다." }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "b003-c002",
+    "bookId": "b003",
+    "order": 1,
+    "title": "On Time",
+    "paragraphs": [
+      {
+        "id": "b003-c002-p001",
+        "order": 0,
+        "sentences": [
+          {
+            "id": "b003-c002-p001-s001",
+            "order": 0,
+            "text": "Do every act of thy life as if it were the last.",
+            "translations": { "ko": "삶의 모든 행위를 그것이 마지막인 것처럼 행하라." }
+          },
+          {
+            "id": "b003-c002-p001-s002",
+            "order": 1,
+            "text": "Never regard something as doing you good if it makes you betray a trust.",
+            "translations": { "ko": "어떤 것이 신의를 저버리게 만든다면, 그것을 결코 너에게 이로운 것으로 여기지 말라." }
+          }
+        ]
+      },
+      {
+        "id": "b003-c002-p002",
+        "order": 1,
+        "sentences": [
+          {
+            "id": "b003-c002-p002-s001",
+            "order": 0,
+            "text": "Think of the whole of existence, of which thou art but a small and fleeting part.",
+            "translations": { "ko": "존재하는 모든 것을 생각하라. 너는 그중 작고 덧없는 한 부분에 지나지 않는다." }
+          },
+          {
+            "id": "b003-c002-p002-s002",
+            "order": 1,
+            "text": "Think of the whole of time, of which a short and indivisible portion has been assigned to thee.",
+            "translations": { "ko": "시간 전체를 생각하라. 그중 짧고 나눌 수 없는 한 조각만이 너에게 주어졌을 뿐이다." }
+          },
+          {
+            "id": "b003-c002-p002-s003",
+            "order": 2,
+            "text": "Confine thyself to the present, and let it be enough.",
+            "translations": { "ko": "너 자신을 현재에 머무르게 하라. 그것으로 충분하다." }
+          }
+        ]
+      }
+    ]
+  }
+]

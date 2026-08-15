@@ -1,0 +1,29 @@
+[
+  {
+    "id": "b001",
+    "collectionId": "col-fables",
+    "title": "The Tortoise and the Hare",
+    "author": "Aesop",
+    "originalLanguage": "en",
+    "chunkIds": ["b001-c001", "b001-c002"],
+    "version": 1
+  },
+  {
+    "id": "b002",
+    "collectionId": "col-fables",
+    "title": "The Ant and the Grasshopper",
+    "author": "Aesop",
+    "originalLanguage": "en",
+    "chunkIds": ["b002-c001", "b002-c002"],
+    "version": 1
+  },
+  {
+    "id": "b003",
+    "collectionId": "col-meditations",
+    "title": "Meditations, Book II (Excerpts)",
+    "author": "Marcus Aurelius",
+    "originalLanguage": "en",
+    "chunkIds": ["b003-c001", "b003-c002"],
+    "version": 1
+  }
+]

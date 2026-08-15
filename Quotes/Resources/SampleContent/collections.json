@@ -1,0 +1,16 @@
+[
+  {
+    "id": "col-fables",
+    "title": "Aesop's Fables",
+    "subtitle": "Timeless short tales with a moral",
+    "bookIds": ["b001", "b002"],
+    "coverSystemImage": "tortoise"
+  },
+  {
+    "id": "col-meditations",
+    "title": "Meditations",
+    "subtitle": "Selected reflections of Marcus Aurelius",
+    "bookIds": ["b003"],
+    "coverSystemImage": "brain.head.profile"
+  }
+]

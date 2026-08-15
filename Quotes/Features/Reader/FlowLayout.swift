@@ -23,20 +23,24 @@ struct FlowLayout: Layout {
         for row in rows {
             var x = bounds.minX
             for item in row.items {
-                let size = subviews[item].sizeThatFits(.unspecified)
-                subviews[item].place(
+                subviews[item.index].place(
                     at: CGPoint(x: x, y: y),
                     anchor: .topLeading,
-                    proposal: ProposedViewSize(size)
+                    proposal: ProposedViewSize(item.size)
                 )
-                x += size.width + spacing
+                x += item.size.width + spacing
             }
             y += row.height + spacing
         }
     }
 
+    private struct Item {
+        var index: Int
+        var size: CGSize
+    }
+
     private struct Row {
-        var items: [Int] = []
+        var items: [Item] = []
         var width: CGFloat = 0
         var height: CGFloat = 0
     }
@@ -45,17 +49,28 @@ struct FlowLayout: Layout {
         var rows: [Row] = []
         var current = Row()
         for index in subviews.indices {
-            let size = subviews[index].sizeThatFits(.unspecified)
+            // Ideal (single-line) size first; a sentence wider than the
+            // container must wrap INSIDE its own chip, so re-measure with the
+            // container width — otherwise Text reports its one-line width and
+            // the row overflows horizontally.
+            var size = subviews[index].sizeThatFits(.unspecified)
+            if size.width > maxWidth, maxWidth.isFinite {
+                size = subviews[index].sizeThatFits(
+                    ProposedViewSize(width: maxWidth, height: nil)
+                )
+                size.width = min(size.width, maxWidth)
+            }
+            let item = Item(index: index, size: size)
             let projected = current.items.isEmpty ? size.width : current.width + spacing + size.width
             if projected > maxWidth, !current.items.isEmpty {
                 rows.append(current)
                 current = Row()
-                current.items = [index]
+                current.items = [item]
                 current.width = size.width
                 current.height = size.height
             } else {
                 if !current.items.isEmpty { current.width += spacing }
-                current.items.append(index)
+                current.items.append(item)
                 current.width += size.width
                 current.height = max(current.height, size.height)
             }

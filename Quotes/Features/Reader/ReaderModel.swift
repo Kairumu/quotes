@@ -171,6 +171,21 @@ final class ReaderModel {
         return topmostVisibleSentenceId ?? pageFirstSentenceId
     }
 
+    /// Reading progress in `0...1`, derived from the current reading position's
+    /// global sentence index over the book's total sentence count.
+    ///
+    /// This is the reader's OWN model (it owns `globalIndexBySentence` and
+    /// `currentPositionSentenceId`), so exposing this computed property here is
+    /// legitimate — distinct from the Home hero, which must derive progress
+    /// independently and must NOT reach into these private reader internals.
+    var progressFraction: Double {
+        let total = globalIndexBySentence.count
+        guard total > 1 else { return total == 1 ? 1 : 0 }
+        guard let id = currentPositionSentenceId,
+              let index = globalIndexBySentence[id] else { return 0 }
+        return min(1, max(0, Double(index) / Double(total - 1)))
+    }
+
     /// Records the first sentence of the visible page (page mode) and persists.
     func notePagePosition(firstSentenceId: String?) {
         pageFirstSentenceId = firstSentenceId

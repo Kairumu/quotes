@@ -38,6 +38,8 @@ public struct ReaderScreen: View {
     public var body: some View {
         content
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .overlay(alignment: .bottom) { progressIndicator }
+            .background(alignment: .top) { readerTopTint }
             .background(ReaderStyle.readingBackground.ignoresSafeArea())
             .safeAreaInset(edge: .top, spacing: 0) { modeBar }
             .safeAreaInset(edge: .bottom, spacing: 0) { selectionBar }
@@ -82,13 +84,55 @@ public struct ReaderScreen: View {
         case .loaded:
             switch env.viewMode {
             case .paragraph:
-                ParagraphModeView(model: model, selection: selection)
+                ParagraphModeView(model: model, selection: selection, chromeHidden: $chromeHidden)
             case .sentence:
-                SentenceModeView(model: model, selection: selection)
+                SentenceModeView(model: model, selection: selection, chromeHidden: $chromeHidden)
             case .page:
                 PageModeView(model: model, selection: selection, chromeHidden: $chromeHidden)
             }
         }
+    }
+
+    // MARK: Progress + palette tint
+
+    /// Unobtrusive percent-progress capsule for the scrolling modes (page mode
+    /// keeps its own `n / N` indicator). Hides with chrome and while a selection
+    /// bar is showing to avoid overlap.
+    @ViewBuilder
+    private var progressIndicator: some View {
+        if model.loadState == .loaded,
+           env.viewMode != .page,
+           !chromeHidden,
+           !selection.isActive {
+            Text("\(Int((model.progressFraction * 100).rounded()))%")
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 5)
+                .background(.thinMaterial, in: Capsule())
+                .padding(.bottom, 10)
+                .allowsHitTesting(false)
+                .transition(.opacity)
+                .animation(.easeInOut(duration: 0.2), value: chromeHidden)
+        }
+    }
+
+    /// Faint top tint derived from the book's `BookPalette`, fading into the
+    /// reading background. Background only — body text/contrast is unaffected.
+    private var readerTopTint: some View {
+        BookPalette.token(for: model.book).backgroundGradient
+            .frame(height: 240)
+            .frame(maxWidth: .infinity, alignment: .top)
+            .mask(
+                LinearGradient(
+                    colors: [.white, .clear],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .opacity(0.45)
+            .ignoresSafeArea(edges: .top)
+            .allowsHitTesting(false)
     }
 
     // MARK: Top mode bar

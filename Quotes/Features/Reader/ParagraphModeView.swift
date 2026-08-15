@@ -6,6 +6,8 @@ import SwiftUI
 struct ParagraphModeView: View {
     let model: ReaderModel
     let selection: ReaderSelectionModel
+    /// Shared immersive-chrome flag: scroll-driven hide/show in this mode.
+    @Binding var chromeHidden: Bool
     @Environment(AppEnvironment.self) private var env
 
     // Data-driven scroll position at PARAGRAPH granularity: sentence chips sit
@@ -30,9 +32,11 @@ struct ParagraphModeView: View {
             }
             .padding(20)
             .scrollTargetLayout()
+            .trackReaderScrollOffset()
         }
         .scrollPosition(id: $scrolledParagraphId, anchor: .top)
         .dragToSelect(model: model, selection: selection)
+        .readerChromeHide(chromeHidden: $chromeHidden)
         .onChange(of: model.pendingScrollTarget) { _, target in
             scroll(to: target)
         }

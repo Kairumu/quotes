@@ -41,4 +41,13 @@ public final class SwiftDataReadingPositionStore: ReadingPositionStore, @uncheck
         }
         try context.save()
     }
+
+    /// Fetch every saved position, sorted `updatedAt`-descending (most recent
+    /// first). SwiftData performs the sort in the fetch descriptor.
+    public func allPositions() throws -> [ReadingPosition] {
+        let descriptor = FetchDescriptor<ReadingPositionRecord>(
+            sortBy: [SortDescriptor(\.updatedAt, order: .reverse)]
+        )
+        return try context.fetch(descriptor).map { $0.toDomain() }
+    }
 }

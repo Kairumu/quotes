@@ -7,6 +7,8 @@ import SwiftUI
 struct SentenceModeView: View {
     let model: ReaderModel
     let selection: ReaderSelectionModel
+    /// Shared immersive-chrome flag: scroll-driven hide/show in this mode.
+    @Binding var chromeHidden: Bool
     @Environment(AppEnvironment.self) private var env
     // Data-driven scroll position: unlike ScrollViewReader.scrollTo, this works
     // for rows a LazyVStack has not instantiated yet (e.g. bookmark deep links
@@ -39,9 +41,11 @@ struct SentenceModeView: View {
             }
             .padding(.vertical, 12)
             .scrollTargetLayout()
+            .trackReaderScrollOffset()
         }
         .scrollPosition(id: $scrolledSentenceId, anchor: .top)
         .dragToSelect(model: model, selection: selection)
+        .readerChromeHide(chromeHidden: $chromeHidden)
         .onChange(of: model.pendingScrollTarget) { _, target in
             scroll(to: target)
         }

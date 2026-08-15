@@ -137,4 +137,9 @@ public final class InMemoryReadingPositionStore: ReadingPositionStore, @unchecke
         lock.lock(); defer { lock.unlock() }
         storage[position.bookId] = position
     }
+
+    public func allPositions() throws -> [ReadingPosition] {
+        lock.lock(); defer { lock.unlock() }
+        return storage.values.sorted { $0.updatedAt > $1.updatedAt }
+    }
 }

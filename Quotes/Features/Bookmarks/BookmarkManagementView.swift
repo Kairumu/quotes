@@ -167,21 +167,33 @@ public struct BookmarkManagementView: View {
     // MARK: List
 
     private var bookmarkList: some View {
-        List(selection: $selectedIDs) {
-            ForEach(grouped, id: \.0) { kind, items in
-                Section {
-                    ForEach(items) { bookmark in
-                        bookmarkRow(bookmark)
-                    }
-                } header: {
-                    BookmarkSectionHeader(kind: kind, count: items.count)
-                }
+        // Attach the selection binding ONLY in edit mode. With it always
+        // attached, a plain tap in browse mode also marks the row Selected,
+        // which interferes with the row's NavigationLink activation.
+        Group {
+            if editMode.isEditing {
+                List(selection: $selectedIDs) { listSections }
+            } else {
+                List { listSections }
             }
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
         .background(QuotesColor.surfacePrimary)
         .environment(\.editMode, $editMode)
+    }
+
+    @ViewBuilder
+    private var listSections: some View {
+        ForEach(grouped, id: \.0) { kind, items in
+            Section {
+                ForEach(items) { bookmark in
+                    bookmarkRow(bookmark)
+                }
+            } header: {
+                BookmarkSectionHeader(kind: kind, count: items.count)
+            }
+        }
     }
 
     // MARK: B2 — Edit action bar

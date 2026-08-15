@@ -1,5 +1,10 @@
 import SwiftUI
 
+/// Value-based routes pushed from the 마이 tab root.
+enum MyRoute: Hashable {
+    case bookmarkManagement
+}
+
 /// The "마이" tab: user profile, reading settings, bookmark shortcut, and app info.
 public struct MyTabView: View {
     @Environment(AppEnvironment.self) private var env
@@ -39,6 +44,16 @@ public struct MyTabView: View {
             // them on a pushed child (BookmarkManagementView) breaks the push
             // transition when that child re-renders — the old screen stays in
             // the render tree, visually overlapping the new one.
+            //
+            // All pushes in this stack are VALUE-based. Mixing a label-based
+            // NavigationLink (마이 → 북마크 관리) with value-based pushes deeper in
+            // the stack made the label link re-fire during the reader push,
+            // stacking a second bookmark screen on top of the reader.
+            .navigationDestination(for: MyRoute.self) { route in
+                switch route {
+                case .bookmarkManagement: BookmarkManagementView()
+                }
+            }
             .navigationDestination(for: Bookmark.self) { bookmark in
                 CaptureDetailView(bookmark: bookmark)
             }
@@ -120,9 +135,7 @@ public struct MyTabView: View {
 
     private var bookmarkSection: some View {
         QuotesSectionCard(title: "북마크") {
-            NavigationLink {
-                BookmarkManagementView()
-            } label: {
+            NavigationLink(value: MyRoute.bookmarkManagement) {
                 QuotesSettingsRow(icon: "bookmark.fill", label: "북마크 관리") {
                     HStack(spacing: QuotesSpacing.sm) {
                         if env.bookmarks.count > 0 {

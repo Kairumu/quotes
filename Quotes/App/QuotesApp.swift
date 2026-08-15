@@ -23,6 +23,30 @@ struct QuotesApp: App {
             container = try! PersistenceSchema.container(inMemory: true)
         }
         self.modelContainer = container
+
+        #if DEBUG
+        // UI-test hook: seed a deterministic highlight bookmark before the
+        // environment (and its BookmarksModel) loads from the store.
+        if ProcessInfo.processInfo.arguments.contains("-seedTestBookmark") {
+            MainActor.assumeIsolated {
+                let store = SwiftDataBookmarkStore(modelContainer: container)
+                let existing = (try? store.all()) ?? []
+                if !existing.contains(where: { $0.name == "UITEST-HL" }) {
+                    try? store.add(Bookmark(
+                        kind: .highlight,
+                        name: "UITEST-HL",
+                        anchor: BookmarkAnchor(
+                            bookId: "b001",
+                            chunkId: "b001-c002",
+                            sentenceIds: ["b001-c002-p002-s002"]
+                        ),
+                        colorTag: "sage"
+                    ))
+                }
+            }
+        }
+        #endif
+
         _environment = State(initialValue: AppEnvironment.live(modelContainer: container))
     }
 

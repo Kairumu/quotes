@@ -35,6 +35,19 @@ public struct MyTabView: View {
             }
             .navigationTitle("마이")
             .navigationBarTitleDisplayMode(.large)
+            // Navigation destinations MUST live at the stack root: registering
+            // them on a pushed child (BookmarkManagementView) breaks the push
+            // transition when that child re-renders — the old screen stays in
+            // the render tree, visually overlapping the new one.
+            .navigationDestination(for: Bookmark.self) { bookmark in
+                CaptureDetailView(bookmark: bookmark)
+            }
+            .navigationDestination(for: BookDestination.self) { dest in
+                ReaderScreen(book: dest.book, initialSentenceId: dest.sentenceId)
+            }
+            .navigationDestination(for: BookCollection.self) { collection in
+                CollectionDetailView(collection: collection)
+            }
         }
     }
 

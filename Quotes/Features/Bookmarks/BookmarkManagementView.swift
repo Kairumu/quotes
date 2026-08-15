@@ -128,17 +128,10 @@ public struct BookmarkManagementView: View {
             }
             Button("취소", role: .cancel) {}
         }
-        // Navigation destinations registered within MyTabView's NavigationStack
-        .navigationDestination(for: Bookmark.self) { bookmark in
-            CaptureDetailView(bookmark: bookmark)
-        }
-        .navigationDestination(for: BookDestination.self) { dest in
-            ReaderScreen(book: dest.book, initialSentenceId: dest.sentenceId)
-        }
-        // Collection bookmark navigation
-        .navigationDestination(for: BookCollection.self) { collection in
-            CollectionDetailView(collection: collection)
-        }
+        // Navigation destinations for Bookmark / BookDestination / BookCollection
+        // are registered at the stack root in MyTabView — NOT here. Registering
+        // them on this pushed view breaks the push transition on re-render
+        // (previous screen overlaps the new one).
         // B2 — Bottom edit action bar (pushes list content up via safe-area inset)
         .safeAreaInset(edge: .bottom) {
             if editMode.isEditing && !bookmarks.isEmpty {

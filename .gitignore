@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+
+# Xcode / XcodeGen (project.yml is the source of truth — run `xcodegen generate`)
+Quotes.xcodeproj/
+xcuserdata/
+DerivedData/
+build/
+build-*/
+
+# OMC orchestration state
+.omc/
+
+# Firebase Functions
+functions/node_modules/
+functions/lib/
+*.log
+.firebase/

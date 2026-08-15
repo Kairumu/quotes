@@ -8,37 +8,53 @@ struct ParagraphModeView: View {
     let selection: ReaderSelectionModel
     @Environment(AppEnvironment.self) private var env
 
+    // Data-driven scroll position at PARAGRAPH granularity: sentence chips sit
+    // inside FlowLayout (not direct scroll-target children), and LazyVStack
+    // never registers un-instantiated anchors with ScrollViewReader — so we
+    // scroll to the paragraph block containing the target sentence instead.
+    @State private var scrolledParagraphId: String?
+
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 20) {
-                    ForEach(model.orderedChunks) { chunk in
-                        if let title = chunk.title {
-                            Text(title)
-                                .font(.title3.bold())
-                                .padding(.top, 20)
-                        }
-                        ForEach(chunk.paragraphs.sorted { $0.order < $1.order }) { paragraph in
-                            paragraphBlock(paragraph, chunkId: chunk.id)
-                        }
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 20) {
+                ForEach(model.orderedChunks) { chunk in
+                    if let title = chunk.title {
+                        Text(title)
+                            .font(.title3.bold())
+                            .padding(.top, 20)
+                    }
+                    ForEach(chunk.paragraphs.sorted { $0.order < $1.order }) { paragraph in
+                        paragraphBlock(paragraph, chunkId: chunk.id)
                     }
                 }
-                .padding(20)
             }
-            .dragToSelect(model: model, selection: selection)
-            .onChange(of: model.pendingScrollTarget) { _, target in
-                scroll(proxy, to: target)
-            }
-            .onAppear { scroll(proxy, to: model.pendingScrollTarget) }
+            .padding(20)
+            .scrollTargetLayout()
         }
+        .scrollPosition(id: $scrolledParagraphId, anchor: .top)
+        .dragToSelect(model: model, selection: selection)
+        .onChange(of: model.pendingScrollTarget) { _, target in
+            scroll(to: target)
+        }
+        .onAppear { scroll(to: model.pendingScrollTarget) }
     }
 
-    private func scroll(_ proxy: ScrollViewProxy, to target: String?) {
+    private func scroll(to target: String?) {
         guard let target else { return }
-        DispatchQueue.main.async {
-            proxy.scrollTo(target, anchor: .top)
-            model.pendingScrollTarget = nil
+        if let paragraphId = paragraphId(containing: target) {
+            scrolledParagraphId = paragraphId
         }
+        model.pendingScrollTarget = nil
+    }
+
+    private func paragraphId(containing sentenceId: String) -> String? {
+        for chunk in model.orderedChunks {
+            for paragraph in chunk.paragraphs
+            where paragraph.sentences.contains(where: { $0.id == sentenceId }) {
+                return paragraph.id
+            }
+        }
+        return nil
     }
 
     @ViewBuilder

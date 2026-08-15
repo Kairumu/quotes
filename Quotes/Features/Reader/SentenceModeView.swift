@@ -8,47 +8,49 @@ struct SentenceModeView: View {
     let model: ReaderModel
     let selection: ReaderSelectionModel
     @Environment(AppEnvironment.self) private var env
+    // Data-driven scroll position: unlike ScrollViewReader.scrollTo, this works
+    // for rows a LazyVStack has not instantiated yet (e.g. bookmark deep links
+    // far down the book).
+    @State private var scrolledSentenceId: String?
 
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: ReaderStyle.rowSpacing) {
-                    ForEach(model.orderedChunks) { chunk in
-                        if let title = chunk.title {
-                            Text(title)
-                                .font(.title3.bold())
-                                .padding(.top, ReaderStyle.titleTopPadding)
-                                .padding(.bottom, ReaderStyle.titleBottomPadding)
-                                .padding(.horizontal, ReaderStyle.rowHorizontalPadding)
-                        }
-                        ForEach(model.orderedSentences(inChunk: chunk.id)) { sentence in
-                            SentenceRowView(
-                                sentence: sentence,
-                                chunkId: chunk.id,
-                                model: model,
-                                selection: selection
-                            )
-                            .id(sentence.id)
-                            .onAppear { model.noteVisibility(sentence.id, visible: true) }
-                            .onDisappear { model.noteVisibility(sentence.id, visible: false) }
-                        }
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: ReaderStyle.rowSpacing) {
+                ForEach(model.orderedChunks) { chunk in
+                    if let title = chunk.title {
+                        Text(title)
+                            .font(.title3.bold())
+                            .padding(.top, ReaderStyle.titleTopPadding)
+                            .padding(.bottom, ReaderStyle.titleBottomPadding)
+                            .padding(.horizontal, ReaderStyle.rowHorizontalPadding)
+                    }
+                    ForEach(model.orderedSentences(inChunk: chunk.id)) { sentence in
+                        SentenceRowView(
+                            sentence: sentence,
+                            chunkId: chunk.id,
+                            model: model,
+                            selection: selection
+                        )
+                        .id(sentence.id)
+                        .onAppear { model.noteVisibility(sentence.id, visible: true) }
+                        .onDisappear { model.noteVisibility(sentence.id, visible: false) }
                     }
                 }
-                .padding(.vertical, 12)
             }
-            .dragToSelect(model: model, selection: selection)
-            .onChange(of: model.pendingScrollTarget) { _, target in
-                scroll(proxy, to: target)
-            }
-            .onAppear { scroll(proxy, to: model.pendingScrollTarget) }
+            .padding(.vertical, 12)
+            .scrollTargetLayout()
         }
+        .scrollPosition(id: $scrolledSentenceId, anchor: .top)
+        .dragToSelect(model: model, selection: selection)
+        .onChange(of: model.pendingScrollTarget) { _, target in
+            scroll(to: target)
+        }
+        .onAppear { scroll(to: model.pendingScrollTarget) }
     }
 
-    private func scroll(_ proxy: ScrollViewProxy, to target: String?) {
+    private func scroll(to target: String?) {
         guard let target else { return }
-        DispatchQueue.main.async {
-            proxy.scrollTo(target, anchor: .top)
-            model.pendingScrollTarget = nil
-        }
+        scrolledSentenceId = target
+        model.pendingScrollTarget = nil
     }
 }

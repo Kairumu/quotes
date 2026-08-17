@@ -77,30 +77,56 @@ struct UnitCarouselView: View {
 
     @ViewBuilder
     private func unitPage(_ unit: ReaderUnit) -> some View {
-        ScrollView(.vertical, showsIndicators: false) {
-            VStack(alignment: .leading, spacing: ReaderStyle.rowSpacing) {
-                if let title = unit.title {
-                    Text(title)
-                        .font(.title3.bold())
-                        .padding(.top, ReaderStyle.titleTopPadding)
-                        .padding(.bottom, ReaderStyle.titleBottomPadding)
-                        .padding(.horizontal, ReaderStyle.rowHorizontalPadding)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+        GeometryReader { geo in
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: ReaderStyle.rowSpacing) {
+                    if let title = unit.title {
+                        Text(title)
+                            .font(.title3.bold())
+                            .padding(.top, ReaderStyle.titleTopPadding)
+                            .padding(.bottom, ReaderStyle.titleBottomPadding)
+                            .padding(.horizontal, ReaderStyle.rowHorizontalPadding)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    unitBody(unit)
                 }
-                unitBody(unit)
+                .padding(.top, pageTopPadding)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                // Vertically center short units; oversized units exceed the
+                // viewport so this min-height is a no-op and they stay
+                // top-anchored and scroll internally (fallback intact). Never a
+                // fixed height — that would clip oversized units.
+                .frame(minHeight: geo.size.height, alignment: .center)
             }
-            .padding(.top, pageTopPadding)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .scrollBounceBehavior(.basedOnSize)
+            .contentShape(Rectangle())
+            // NO dragToSelect here: the long-press-then-drag gesture delays touch
+            // delivery to TabView's paging recognizer and swallows horizontal
+            // swipes — pages stop flipping. In carousels, selection is tap-based
+            // (tap-select / tap-to-extend on rows and chips), which already covers
+            // the on-screen-unit selection scope; full drag-select lives in
+            // 이어보기 (ContinuousModeView) only.
+            .onTapGesture { toggleChrome() }
+            // Full-page highlight wash: when EVERY sentence of this unit is
+            // highlighted, the whole page carries the highlight color (softer
+            // than the row tint, layered behind content). Derived live from
+            // env.bookmarks via the model accessors, so it appears/disappears
+            // with highlight add/remove. A background never intercepts touches,
+            // so TabView paging is unaffected.
+            .background(fullUnitWash(unit))
         }
-        .scrollBounceBehavior(.basedOnSize)
-        .contentShape(Rectangle())
-        // NO dragToSelect here: the long-press-then-drag gesture delays touch
-        // delivery to TabView's paging recognizer and swallows horizontal
-        // swipes — pages stop flipping. In carousels, selection is tap-based
-        // (tap-select / tap-to-extend on rows and chips), which already covers
-        // the on-screen-unit selection scope; full drag-select lives in
-        // 이어보기 (ContinuousModeView) only.
-        .onTapGesture { toggleChrome() }
+    }
+
+    /// Soft full-page wash color when the unit is entirely highlighted;
+    /// otherwise clear. Uses the first sentence's highlight color.
+    private func fullUnitWash(_ unit: ReaderUnit) -> Color {
+        guard let first = unit.sentences.first,
+              unit.sentences.allSatisfy({ model.isHighlighted($0.id) }) else {
+            return .clear
+        }
+        return HighlightPalette
+            .color(forTag: model.highlightColorTag(for: first.id))
+            .opacity(0.16)
     }
 
     @ViewBuilder

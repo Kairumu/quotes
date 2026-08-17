@@ -20,7 +20,9 @@ final class ReaderModeSwitchingUITests: XCTestCase {
     @MainActor
     private func launchApp() -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-seedTestBookmark"]
+        // -disableChromeAutoHide: these tests assert reader chrome (nav bar /
+        // mode segments / progress capsule) past the 3s auto-hide mark.
+        app.launchArguments = ["-seedTestBookmark", "-disableChromeAutoHide"]
         app.launch()
         sleep(2)
         return app
@@ -213,5 +215,76 @@ final class ReaderModeSwitchingUITests: XCTestCase {
         // (XCTest shares the simulator's UserDefaults across test cases in one run.)
         let reset = app.buttons["이어보기"]
         if reset.waitForExistence(timeout: 5) { reset.tap(); sleep(1) }
+    }
+
+    /// 5. One-shot 3s auto-hide (T3). Launches WITHOUT `-disableChromeAutoHide`
+    ///    (the only test that does), so the timer runs live: touch nothing → all
+    ///    reader chrome fades out at ~3s; a user action (tap) brings it back and
+    ///    it then STAYS (the one-shot never re-arms).
+    ///
+    ///    Runs in a DETERMINISTIC paged mode (문장) forced via the `reader.viewMode`
+    ///    launch-argument default (NSArgumentDomain — volatile, not persisted, so
+    ///    it neither depends on nor pollutes other tests' saved mode). Paged mode
+    ///    is used deliberately: the plan's §T5 restores chrome by TAP, which is a
+    ///    paged-mode gesture (tap-to-toggle). The 10-sentence sample book does not
+    ///    reliably exceed one viewport in 이어보기, so continuous scroll-restore has
+    ///    no guaranteed offset travel and is non-deterministic; tap-to-toggle in a
+    ///    paged mode is bulletproof. Auto-hide itself is mode-agnostic (arms on
+    ///    load in every mode), so this fully exercises the one-shot timer.
+    @MainActor
+    func testChromeAutoHidesOnceAndStaysAfterTap() throws {
+        let app = XCUIApplication()
+        // Deliberately WITHOUT -disableChromeAutoHide: this test exercises the
+        // live auto-hide timer. Force 문장 (paged) for a deterministic tap-restore.
+        app.launchArguments = ["-seedTestBookmark", "-reader.viewMode", "sentence"]
+        app.launch()
+        sleep(2)
+
+        openReader(in: app)
+
+        let readerBar = app.navigationBars["The Tortoise and the Hare"]
+
+        // Auto-hide must fire within a bounded window. Do NOT pre-assert
+        // "chrome visible right after load": openReader's navigation time is
+        // variable and the 3s timer can legitimately fire before this test's
+        // first assertion — asserting visibility here is a timing race, not a
+        // product requirement. The disappearance itself is the contract.
+        let gone = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "exists == false"),
+            object: readerBar
+        )
+        XCTAssertEqual(
+            XCTWaiter().wait(for: [gone], timeout: 10),
+            .completed,
+            "Reader nav bar never auto-hid — 3s one-shot timer did not fire"
+        )
+        attach(app, name: "Auto-hide: chrome faded")
+
+        // Restore chrome via a user tap. In paged mode any tap on the page (that
+        // is not on the sentence row / edge zones) toggles chrome. The unit is
+        // vertically centered (T1), so tap the empty area in the UPPER third,
+        // which lands on the page ScrollView's toggle gesture, not the sentence.
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.16)).tap()
+        XCTAssertTrue(
+            readerBar.waitForExistence(timeout: 5),
+            "Reader nav bar did not return after tap — chrome not restored"
+        )
+        attach(app, name: "Auto-hide: chrome restored by tap")
+
+        // Verify the forced paged 문장 mode NOW, while chrome is guaranteed
+        // visible (checking it earlier races the auto-hide timer).
+        XCTAssertTrue(
+            app.buttons["문장"].waitForExistence(timeout: 5) && app.buttons["문장"].isSelected,
+            "문장 mode not active — launch-arg viewMode override did not take"
+        )
+
+        // The one-shot never re-arms: chrome must STILL be visible several
+        // seconds later with no further interaction.
+        sleep(4)
+        XCTAssertTrue(
+            readerBar.exists,
+            "Reader nav bar auto-hid a SECOND time — the one-shot timer re-armed"
+        )
+        attach(app, name: "Auto-hide: chrome still visible (no re-arm)")
     }
 }

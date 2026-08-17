@@ -8,7 +8,9 @@ final class BookmarkNavigationUITests: XCTestCase {
     @MainActor
     func testOpenHighlightBookmarkFromMyTab() throws {
         let app = XCUIApplication()
-        app.launchArguments = ["-seedTestBookmark"]
+        // -disableChromeAutoHide: asserts reader nav bar at T+2s AND T+8s settled,
+        // past the 3s auto-hide mark.
+        app.launchArguments = ["-seedTestBookmark", "-disableChromeAutoHide"]
         app.launch()
         sleep(2)
 

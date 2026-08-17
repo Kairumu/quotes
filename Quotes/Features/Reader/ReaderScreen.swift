@@ -10,6 +10,7 @@ import UIKit
 public struct ReaderScreen: View {
     @Environment(AppEnvironment.self) private var env
     @Environment(\.displayScale) private var displayScale
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var model: ReaderModel
     @State private var selection = ReaderSelectionModel()
@@ -31,6 +32,16 @@ public struct ReaderScreen: View {
     /// Immersive reading: hides the mode bar and navigation chrome in page mode.
     @State private var chromeHidden = false
 
+    /// One-shot auto-hide state machine (T3). `autoHideTask` non-nil ⇔ armed;
+    /// `autoHideConsumed` true ⇔ fired or cancelled (terminal, never re-arms).
+    @State private var autoHideTask: Task<Void, Never>?
+    @State private var autoHideConsumed = false
+
+    /// Kill switch honoured by UI tests that assert reader chrome past the 3s mark.
+    private var autoHideDisabled: Bool {
+        ProcessInfo.processInfo.arguments.contains("-disableChromeAutoHide")
+    }
+
     public init(book: Book, initialSentenceId: String? = nil) {
         _model = State(initialValue: ReaderModel(book: book, initialSentenceId: initialSentenceId))
     }
@@ -47,11 +58,35 @@ public struct ReaderScreen: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbarItems }
             .toolbar(chromeHidden ? .hidden : .visible, for: .navigationBar)
+            .toolbar(chromeHidden ? .hidden : .visible, for: .tabBar)
             .statusBarHidden(chromeHidden)
             .animation(.easeInOut(duration: 0.2), value: selection.isActive)
-            .animation(.easeInOut(duration: 0.2), value: chromeHidden)
-            .task { await model.load(env: env) }
-            .onDisappear { model.persistPosition() }
+            // Single value-animation source for chrome; ~0.3s lands the auto-fade
+            // in the 0.3–0.5s spec window and doubles as the manual-toggle timing.
+            // Reduce Motion → no animation (instant), matching UnitCarouselView.
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.3), value: chromeHidden)
+            .task {
+                await model.load(env: env)
+                // Arm right after load resolves, covering the case where the
+                // state change lands before .onChange observes it.
+                armAutoHide()
+            }
+            .onChange(of: model.loadState) { armAutoHide() }
+            .onChange(of: chromeHidden) { cancelAutoHide() }
+            .onChange(of: model.currentPositionSentenceId) { old, _ in
+                // Genuine navigation (swipe to next unit, sub-hysteresis scroll)
+                // moves between two real sentences → cancel. The initial landing
+                // establishes position as nil → sentence; that is NOT a user
+                // interaction, so it must not consume the one-shot timer.
+                if old != nil { cancelAutoHide() }
+            }
+            // N1: a mode switch within the armed window sets chromeHidden = false
+            // when it is ALREADY false, so onChange(chromeHidden) alone misses it.
+            .onChange(of: env.viewMode) { cancelAutoHide() }
+            .onDisappear {
+                model.persistPosition()
+                autoHideTask?.cancel()
+            }
             .alert("북마크 이름", isPresented: renameAlertPresented) {
                 TextField("이름", text: $renameText)
                 Button("저장") { commitRename() }
@@ -187,12 +222,52 @@ public struct ReaderScreen: View {
                 // Preserve reading position: land the new mode on the same
                 // sentence (works across all 4 modes via pendingScrollTarget).
                 model.pendingScrollTarget = model.currentPositionSentenceId
+                // A mode switch is a user interaction: cancel any pending
+                // auto-hide. Required here because the setter writes
+                // chromeHidden = false, which does NOT fire onChange when chrome
+                // was already visible.
+                cancelAutoHide()
                 // Reset chrome on any switch: paged modes use tap-to-toggle;
                 // 이어보기 re-derives visibility from scroll.
                 chromeHidden = false
                 env.viewMode = newValue
             }
         )
+    }
+
+    // MARK: Auto-hide state machine (T3)
+
+    /// idle → armed. One-shot: guarded so it never re-arms after firing or
+    /// cancellation, and stays disabled under the `-disableChromeAutoHide` flag.
+    private func armAutoHide() {
+        guard !autoHideConsumed, autoHideTask == nil, !autoHideDisabled else { return }
+        guard model.loadState == .loaded else { return }
+        autoHideTask = Task {
+            try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
+            fireAutoHide()
+        }
+    }
+
+    /// armed → fired. Mark terminal BEFORE flipping chrome so the
+    /// `onChange(chromeHidden)` observer treats this as a no-op cancel.
+    @MainActor
+    private func fireAutoHide() {
+        guard !autoHideConsumed else { return }
+        autoHideConsumed = true
+        autoHideTask = nil
+        if reduceMotion {
+            chromeHidden = true
+        } else {
+            withAnimation(.easeInOut(duration: 0.35)) { chromeHidden = true }
+        }
+    }
+
+    /// armed → cancelled. Terminal; any user-driven chrome interaction lands here.
+    private func cancelAutoHide() {
+        autoHideTask?.cancel()
+        autoHideTask = nil
+        autoHideConsumed = true
     }
 
     // MARK: Selection action bar

@@ -16,6 +16,9 @@ final class BooksNavigationUITests: XCTestCase {
     @MainActor
     func testLibraryCoverToDetailToReaderPushesCleanly() throws {
         let app = XCUIApplication()
+        // -disableChromeAutoHide: asserts the 이어보기 mode bar at T+8s settled,
+        // past the 3s auto-hide mark.
+        app.launchArguments = ["-disableChromeAutoHide"]
         app.launch()
         sleep(2)
 

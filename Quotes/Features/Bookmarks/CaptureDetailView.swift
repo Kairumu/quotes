@@ -28,8 +28,8 @@ public struct CaptureDetailView: View {
                     CaptureCardView(
                         sentences: sentences,
                         book: book,
-                        showTranslation: env.showTranslation,
-                        translationLanguage: env.translationLanguage
+                        displayMode: env.translationDisplay,
+                        translationLanguage: env.effectiveLanguage(for: book)
                     )
                     .padding(.horizontal)
 
@@ -113,8 +113,8 @@ public struct CaptureDetailView: View {
         let card = CaptureCardView(
             sentences: sentences,
             book: book,
-            showTranslation: env.showTranslation,
-            translationLanguage: env.translationLanguage
+            displayMode: env.translationDisplay,
+            translationLanguage: env.effectiveLanguage(for: book)
         )
         let renderer = ImageRenderer(content: card)
         renderer.scale = 3

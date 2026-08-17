@@ -41,11 +41,12 @@ final class BooksNavigationUITests: XCTestCase {
         startButton.tap()
 
         // 5) The reader must be the TOP screen. Prove it with a reader-ONLY probe:
-        //    the 보기 모드 segmented control's 문장 segment (absent on Book Detail).
-        let readerProbe = app.buttons["문장"]
+        //    the 보기 모드 segmented control's 이어보기 segment (absent on Book Detail).
+        //    Default mode is .continuous (이어보기) per the global reader.viewMode default.
+        let readerProbe = app.buttons["이어보기"]
         XCTAssertTrue(
             readerProbe.waitForExistence(timeout: 8),
-            "Reader mode bar (문장) not on top — push failed or was covered"
+            "Reader mode bar (이어보기) not on top — push failed or was covered"
         )
         sleep(2)
         attach(name: "T+2s after 처음부터")

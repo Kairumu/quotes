@@ -13,13 +13,13 @@
             "id": "b002-c001-p001-s001",
             "order": 0,
             "text": "In a field one summer's day a grasshopper was hopping about, chirping and singing to its heart's content.",
-            "translations": { "ko": "어느 여름날 들판에서 베짱이가 마음껏 지저귀며 노래하고 뛰놀고 있었다." }
+            "translations": { "ko": "어느 여름날 들판에서 베짱이가 마음껏 지저귀며 노래하고 뛰놀고 있었다.", "zh": "一个夏日，田野里，一只蚱蜢正尽情地蹦跳着，鸣叫歌唱。", "ja": "ある夏の日、野原で一匹のキリギリスが、心ゆくまで鳴き歌いながら飛び跳ねていた。" }
           },
           {
             "id": "b002-c001-p001-s002",
             "order": 1,
             "text": "An ant passed by, bearing along with great effort an ear of corn he was taking to the nest.",
-            "translations": { "ko": "개미 한 마리가 옥수수 이삭을 힘겹게 짊어지고 둥지로 나르며 지나갔다." }
+            "translations": { "ko": "개미 한 마리가 옥수수 이삭을 힘겹게 짊어지고 둥지로 나르며 지나갔다.", "zh": "一只蚂蚁吃力地扛着一穗玉米，正往巢里搬运，从旁边经过。", "ja": "一匹のアリが、巣へ運ぶトウモロコシの穂を苦労して背負いながら通りかかった。" }
           }
         ]
       },
@@ -31,19 +31,19 @@
             "id": "b002-c001-p002-s001",
             "order": 0,
             "text": "\"Why not come and chat with me,\" said the grasshopper, \"instead of toiling away in that dreary fashion?\"",
-            "translations": { "ko": "\"그렇게 따분하게 애쓰지 말고, 이리 와서 나랑 이야기나 나누는 게 어때?\" 베짱이가 말했다." }
+            "translations": { "ko": "\"그렇게 따분하게 애쓰지 말고, 이리 와서 나랑 이야기나 나누는 게 어때?\" 베짱이가 말했다.", "zh": "“何必那样苦哈哈地劳作呢，”蚱蜢说，“过来跟我聊聊天不好吗？”", "ja": "「そんなに味気なくあくせく働かずに、こっちへ来て私とおしゃべりでもしないかい？」とキリギリスは言った。" }
           },
           {
             "id": "b002-c001-p002-s002",
             "order": 1,
             "text": "\"I am helping to lay up food for the winter,\" said the ant, \"and I recommend you to do the same.\"",
-            "translations": { "ko": "\"나는 겨울에 대비해 먹을 것을 저장하는 일을 돕고 있어,\" 개미가 말했다. \"너도 그렇게 하길 권하고 싶구나.\"" }
+            "translations": { "ko": "\"나는 겨울에 대비해 먹을 것을 저장하는 일을 돕고 있어,\" 개미가 말했다. \"너도 그렇게 하길 권하고 싶구나.\"", "zh": "“我在帮着储备过冬的粮食，”蚂蚁说，“也劝你早做同样的打算。”", "ja": "「私は冬に備えて食糧を蓄えるのを手伝っているのさ」とアリは言った。「お前にも同じようにするよう勧めるよ。」" }
           },
           {
             "id": "b002-c001-p002-s003",
             "order": 2,
             "text": "\"Why bother about winter?\" said the grasshopper. \"We have got plenty of food at present.\"",
-            "translations": { "ko": "\"겨울 걱정은 왜 해?\" 베짱이가 말했다. \"지금은 먹을 게 넘쳐나잖아.\"" }
+            "translations": { "ko": "\"겨울 걱정은 왜 해?\" 베짱이가 말했다. \"지금은 먹을 게 넘쳐나잖아.\"", "zh": "“何必为冬天操心？”蚱蜢说，“眼下食物多的是嘛。”", "ja": "「冬のことなど気にして何になる？」とキリギリスは言った。「今は食べ物があり余っているじゃないか。」" }
           }
         ]
       }
@@ -63,13 +63,13 @@
             "id": "b002-c002-p001-s001",
             "order": 0,
             "text": "But the ant went on its way and continued its toil.",
-            "translations": { "ko": "그러나 개미는 제 갈 길을 가며 하던 일을 계속했다." }
+            "translations": { "ko": "그러나 개미는 제 갈 길을 가며 하던 일을 계속했다.", "zh": "可蚂蚁只顾走自己的路，继续辛勤劳作。", "ja": "けれどもアリは自分の道を行き、せっせと働き続けた。" }
           },
           {
             "id": "b002-c002-p001-s002",
             "order": 1,
             "text": "When the winter came the grasshopper had no food, and found itself dying of hunger.",
-            "translations": { "ko": "겨울이 오자 베짱이는 먹을 것이 없어 굶주림에 죽어 가고 있었다." }
+            "translations": { "ko": "겨울이 오자 베짱이는 먹을 것이 없어 굶주림에 죽어 가고 있었다.", "zh": "冬天来临，蚱蜢没有食物，眼看就要饿死了。", "ja": "冬が来ると、キリギリスは食べ物がなく、飢えのために死にかけていた。" }
           }
         ]
       },
@@ -81,13 +81,13 @@
             "id": "b002-c002-p002-s001",
             "order": 0,
             "text": "Meanwhile it saw the ants handing out corn and grain from the stores they had collected in the summer.",
-            "translations": { "ko": "그러는 사이 베짱이는 개미들이 여름 동안 모아 둔 곳간에서 옥수수와 곡식을 나누어 주는 모습을 보았다." }
+            "translations": { "ko": "그러는 사이 베짱이는 개미들이 여름 동안 모아 둔 곳간에서 옥수수와 곡식을 나누어 주는 모습을 보았다.", "zh": "这时，它看见蚂蚁们正从夏天积攒的库存里分发玉米和谷物。", "ja": "そのあいだにキリギリスは、アリたちが夏のうちに蓄えた倉から、トウモロコシや穀物を分け合っているのを見た。" }
           },
           {
             "id": "b002-c002-p002-s002",
             "order": 1,
             "text": "Then the grasshopper understood: it is best to prepare today for the days of need.",
-            "translations": { "ko": "그제서야 베짱이는 깨달았다. 궁핍한 날에 대비하여 오늘 준비해 두는 것이 가장 좋다는 것을." }
+            "translations": { "ko": "그제서야 베짱이는 깨달았다. 궁핍한 날에 대비하여 오늘 준비해 두는 것이 가장 좋다는 것을.", "zh": "这时蚱蜢才明白：为困乏的日子未雨绸缪，才是上策。", "ja": "そのときキリギリスは悟った。欠乏の日に備えて今日から用意しておくのが、いちばんよいのだと。" }
           }
         ]
       }

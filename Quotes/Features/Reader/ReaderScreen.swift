@@ -83,25 +83,28 @@ public struct ReaderScreen: View {
             }
         case .loaded:
             switch env.viewMode {
-            case .paragraph:
-                ParagraphModeView(model: model, selection: selection, chromeHidden: $chromeHidden)
             case .sentence:
-                SentenceModeView(model: model, selection: selection, chromeHidden: $chromeHidden)
+                UnitCarouselView(granularity: .sentence, model: model, selection: selection, chromeHidden: $chromeHidden)
+            case .paragraph:
+                UnitCarouselView(granularity: .paragraph, model: model, selection: selection, chromeHidden: $chromeHidden)
             case .page:
                 PageModeView(model: model, selection: selection, chromeHidden: $chromeHidden)
+            case .continuous:
+                ContinuousModeView(model: model, selection: selection, chromeHidden: $chromeHidden)
             }
         }
     }
 
     // MARK: Progress + palette tint
 
-    /// Unobtrusive percent-progress capsule for the scrolling modes (page mode
-    /// keeps its own `n / N` indicator). Hides with chrome and while a selection
-    /// bar is showing to avoid overlap.
+    /// Unobtrusive percent-progress capsule for 이어보기 only. The paged modes
+    /// (문장/문단/페이지) render their own combined "n / N · %" capsule, so this
+    /// is gated to `.continuous` to avoid a double capsule. Hides with chrome and
+    /// while a selection bar is showing to avoid overlap.
     @ViewBuilder
     private var progressIndicator: some View {
         if model.loadState == .loaded,
-           env.viewMode != .page,
+           env.viewMode == .continuous,
            !chromeHidden,
            !selection.isActive {
             Text("\(Int((model.progressFraction * 100).rounded()))%")
@@ -141,12 +144,18 @@ public struct ReaderScreen: View {
     private var modeBar: some View {
         if model.loadState == .loaded && !chromeHidden {
             VStack(spacing: 0) {
+                // 4-segment mode control (문장/문단/페이지/이어보기). Labels come
+                // from `ReaderViewMode.displayName` so the picker and UI tests
+                // share one source. If this truncates at large Dynamic Type /
+                // SE width, swap to a scrollable chip row keeping the identifier.
                 Picker("보기 모드", selection: viewModeBinding) {
-                    Text("문장").tag(ReaderViewMode.sentence)
-                    Text("문단").tag(ReaderViewMode.paragraph)
-                    Text("페이지").tag(ReaderViewMode.page)
+                    Text(ReaderViewMode.sentence.displayName).tag(ReaderViewMode.sentence)
+                    Text(ReaderViewMode.paragraph.displayName).tag(ReaderViewMode.paragraph)
+                    Text(ReaderViewMode.page.displayName).tag(ReaderViewMode.page)
+                    Text(ReaderViewMode.continuous.displayName).tag(ReaderViewMode.continuous)
                 }
                 .pickerStyle(.segmented)
+                .accessibilityIdentifier("reader.mode.picker")
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
                 Divider()
@@ -156,14 +165,31 @@ public struct ReaderScreen: View {
         }
     }
 
+    private var displayModeBinding: Binding<TranslationDisplayMode> {
+        Binding(
+            get: { env.translationDisplay },
+            set: { env.translationDisplay = $0 }
+        )
+    }
+
+    private var languageBinding: Binding<String> {
+        Binding(
+            get: { env.translationLanguage },
+            set: { env.translationLanguage = $0 }
+        )
+    }
+
     private var viewModeBinding: Binding<ReaderViewMode> {
         Binding(
             get: { env.viewMode },
             set: { newValue in
                 guard newValue.isAvailable, newValue != env.viewMode else { return }
-                // Preserve reading position: land the new mode on the same sentence.
+                // Preserve reading position: land the new mode on the same
+                // sentence (works across all 4 modes via pendingScrollTarget).
                 model.pendingScrollTarget = model.currentPositionSentenceId
-                if newValue != .page { chromeHidden = false }
+                // Reset chrome on any switch: paged modes use tap-to-toggle;
+                // 이어보기 re-derives visibility from scroll.
+                chromeHidden = false
                 env.viewMode = newValue
             }
         )
@@ -307,10 +333,19 @@ public struct ReaderScreen: View {
     @ToolbarContentBuilder
     private var toolbarItems: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
-            Button {
-                env.showTranslation.toggle()
+            Menu {
+                Picker("번역 표시", selection: displayModeBinding) {
+                    ForEach(TranslationDisplayMode.allCases) { mode in
+                        Text(mode.displayName).tag(mode)
+                    }
+                }
+                Picker("번역 언어", selection: languageBinding) {
+                    ForEach(AppEnvironment.languageOptions(for: model.book), id: \.self) { code in
+                        Text(AppEnvironment.languageDisplayName(code)).tag(code)
+                    }
+                }
             } label: {
-                Image(systemName: env.showTranslation ? "character.bubble.fill" : "character.bubble")
+                Image(systemName: env.translationDisplay == .originalOnly ? "character.bubble" : "character.bubble.fill")
             }
             .accessibilityLabel("번역 표시")
         }
@@ -377,8 +412,8 @@ public struct ReaderScreen: View {
         let card = CaptureCardView(
             sentences: sentences,
             book: model.book,
-            showTranslation: env.showTranslation,
-            translationLanguage: env.translationLanguage
+            displayMode: env.translationDisplay,
+            translationLanguage: env.effectiveLanguage(for: model.book)
         )
         let renderer = ImageRenderer(content: card)
         renderer.scale = displayScale

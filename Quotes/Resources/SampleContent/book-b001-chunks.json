@@ -13,19 +13,19 @@
             "id": "b001-c001-p001-s001",
             "order": 0,
             "text": "A hare was one day making fun of a tortoise for being so slow upon his feet.",
-            "translations": { "ko": "어느 날 토끼가 걸음이 느리다고 거북이를 놀리고 있었다." }
+            "translations": { "ko": "어느 날 토끼가 걸음이 느리다고 거북이를 놀리고 있었다.", "zh": "有一天，兔子嘲笑乌龟走起路来太慢。", "ja": "ある日、ウサギは足の遅い亀をからかっていた。" }
           },
           {
             "id": "b001-c001-p001-s002",
             "order": 1,
             "text": "\"Do you ever get anywhere?\" he asked with a mocking laugh.",
-            "translations": { "ko": "\"넌 도대체 어디에라도 도착하긴 하니?\" 토끼가 비웃으며 물었다." }
+            "translations": { "ko": "\"넌 도대체 어디에라도 도착하긴 하니?\" 토끼가 비웃으며 물었다.", "zh": "“你到底能走到什么地方去吗？”兔子讥笑着问道。", "ja": "「お前はいったいどこかにたどり着けるのかい？」とウサギはあざ笑いながら尋ねた。" }
           },
           {
             "id": "b001-c001-p001-s003",
             "order": 2,
             "text": "\"Yes,\" replied the tortoise, \"and I get there sooner than you think.\"",
-            "translations": { "ko": "\"물론이지,\" 거북이가 대답했다. \"게다가 네 생각보다 더 빨리 도착한단다.\"" }
+            "translations": { "ko": "\"물론이지,\" 거북이가 대답했다. \"게다가 네 생각보다 더 빨리 도착한단다.\"", "zh": "“当然，”乌龟答道，“而且比你想的还要早到呢。”", "ja": "「もちろんさ」と亀は答えた。「しかもお前が思うより早く着くのだよ。」" }
           }
         ]
       },
@@ -37,13 +37,13 @@
             "id": "b001-c001-p002-s001",
             "order": 0,
             "text": "The hare laughed loudly at the very idea of it.",
-            "translations": { "ko": "토끼는 그 말이 우습다는 듯 크게 웃었다." }
+            "translations": { "ko": "토끼는 그 말이 우습다는 듯 크게 웃었다.", "zh": "兔子听了这话，只觉得可笑，放声大笑起来。", "ja": "ウサギはそんな話がおかしくてたまらず、大声で笑った。" }
           },
           {
             "id": "b001-c001-p002-s002",
             "order": 1,
             "text": "\"Come, let us try a race, and I will prove it to you,\" he said.",
-            "translations": { "ko": "\"자, 그럼 우리 경주를 해 보자. 내가 증명해 줄게,\" 토끼가 말했다." }
+            "translations": { "ko": "\"자, 그럼 우리 경주를 해 보자. 내가 증명해 줄게,\" 토끼가 말했다.", "zh": "“来吧，我们比一场赛跑，我来证明给你看，”兔子说。", "ja": "「さあ、それなら競走してみようじゃないか。証明してみせるよ」とウサギは言った。" }
           }
         ]
       }
@@ -63,13 +63,13 @@
             "id": "b001-c002-p001-s001",
             "order": 0,
             "text": "On the day of the race the two started off together.",
-            "translations": { "ko": "경주 당일, 둘은 함께 출발했다." }
+            "translations": { "ko": "경주 당일, 둘은 함께 출발했다.", "zh": "赛跑那天，两个一同出发了。", "ja": "競走の当日、二匹はいっしょに走り出した。" }
           },
           {
             "id": "b001-c002-p001-s002",
             "order": 1,
             "text": "The tortoise never stopped for a moment, plodding slowly but steadily toward the goal.",
-            "translations": { "ko": "거북이는 한순간도 멈추지 않고 느리지만 꾸준히 결승선을 향해 나아갔다." }
+            "translations": { "ko": "거북이는 한순간도 멈추지 않고 느리지만 꾸준히 결승선을 향해 나아갔다.", "zh": "乌龟一刻也不停歇，缓慢却坚定地朝终点走去。", "ja": "亀は一瞬たりとも立ち止まらず、遅いながらも着実にゴールへと歩み続けた。" }
           }
         ]
       },
@@ -81,19 +81,19 @@
             "id": "b001-c002-p002-s001",
             "order": 0,
             "text": "The hare ran swiftly, and being so sure of winning, lay down by the wayside to take a nap.",
-            "translations": { "ko": "토끼는 빠르게 달렸고, 승리를 확신한 나머지 길가에 누워 낮잠을 잤다." }
+            "translations": { "ko": "토끼는 빠르게 달렸고, 승리를 확신한 나머지 길가에 누워 낮잠을 잤다.", "zh": "兔子跑得飞快，深信自己稳操胜券，便躺在路边睡起了午觉。", "ja": "ウサギは足早に駆け、勝利を確信するあまり、道端に寝ころんで昼寝をした。" }
           },
           {
             "id": "b001-c002-p002-s002",
             "order": 1,
             "text": "When he awoke, he saw the tortoise just reaching the goal, and he could not run up in time to save the race.",
-            "translations": { "ko": "잠에서 깨어났을 때, 토끼는 거북이가 막 결승선에 닿는 것을 보았고, 아무리 달려도 경주를 되돌릴 수 없었다." }
+            "translations": { "ko": "잠에서 깨어났을 때, 토끼는 거북이가 막 결승선에 닿는 것을 보았고, 아무리 달려도 경주를 되돌릴 수 없었다.", "zh": "等他醒来，只见乌龟正好到达终点，任他怎样飞奔，也已无法挽回这场比赛。", "ja": "目を覚ましたとき、ウサギは亀がちょうどゴールにたどり着くのを見た。もはやどれほど走っても、勝負を取り返すことはできなかった。" }
           },
           {
             "id": "b001-c002-p002-s003",
             "order": 2,
             "text": "Slow and steady wins the race.",
-            "translations": { "ko": "느려도 꾸준한 자가 경주에서 이긴다." }
+            "translations": { "ko": "느려도 꾸준한 자가 경주에서 이긴다.", "zh": "缓慢而坚定者，终能赢得赛跑。", "ja": "遅くとも着実な者が、競走に勝つのだ。" }
           }
         ]
       }

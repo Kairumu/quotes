@@ -17,23 +17,34 @@ struct SentenceRowView: View {
             ? HighlightPalette.color(forTag: model.highlightColorTag(for: sentence.id))
             : nil
         let selected = selection.isSelected(sentence.id)
+        let language = env.effectiveLanguage(for: model.book)
         VStack(alignment: .leading, spacing: ReaderStyle.rowInternalSpacing) {
-            Text(sentence.text)
-                .font(ReaderStyle.originalFont)
-                .lineSpacing(ReaderStyle.lineSpacing)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            if env.showTranslation, let translation = sentence.translations[env.translationLanguage] {
-                HStack(alignment: .top, spacing: ReaderStyle.translationLeadingInset - ReaderStyle.translationRuleWidth) {
-                    RoundedRectangle(cornerRadius: 1, style: .continuous)
-                        .fill(ReaderStyle.translationRuleColor)
-                        .frame(width: ReaderStyle.translationRuleWidth)
-                    Text(translation)
-                        .font(ReaderStyle.translationFont)
-                        .foregroundStyle(.secondary)
-                        .lineSpacing(ReaderStyle.lineSpacing)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+            if env.translationDisplay == .translationOnly {
+                // Translation replaces the original — same fallback expression
+                // and font as `Paginator.height(of:)` so pages don't overflow.
+                Text(sentence.translations[language] ?? sentence.text)
+                    .font(ReaderStyle.originalFont)
+                    .lineSpacing(ReaderStyle.lineSpacing)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                Text(sentence.text)
+                    .font(ReaderStyle.originalFont)
+                    .lineSpacing(ReaderStyle.lineSpacing)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                if env.translationDisplay == .interleave,
+                   let translation = sentence.translations[language] {
+                    HStack(alignment: .top, spacing: ReaderStyle.translationLeadingInset - ReaderStyle.translationRuleWidth) {
+                        RoundedRectangle(cornerRadius: 1, style: .continuous)
+                            .fill(ReaderStyle.translationRuleColor)
+                            .frame(width: ReaderStyle.translationRuleWidth)
+                        Text(translation)
+                            .font(ReaderStyle.translationFont)
+                            .foregroundStyle(.secondary)
+                            .lineSpacing(ReaderStyle.lineSpacing)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
                 }
-                .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(.vertical, ReaderStyle.rowVerticalPadding)

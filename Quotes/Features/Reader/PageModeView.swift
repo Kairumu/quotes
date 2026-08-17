@@ -40,7 +40,7 @@ struct PageModeView: View {
             }
         }
         .onChange(of: dynamicTypeSize) { repaginate() }
-        .onChange(of: env.showTranslation) { repaginate() }
+        .onChange(of: env.translationDisplay) { repaginate() }
         .onChange(of: env.translationLanguage) { repaginate() }
         .onChange(of: currentPage) { updatePagePosition() }
         .onChange(of: model.pendingScrollTarget) { _, target in
@@ -106,10 +106,14 @@ struct PageModeView: View {
             .onTapGesture(perform: action)
     }
 
+    /// Combined "n / N · %" capsule rendered BY the paged view. The
+    /// ReaderScreen-level `%` capsule is 이어보기-only, so paged modes own their
+    /// single progress capsule (identifier queried by the mode-switch UI test).
     @ViewBuilder
     private func pageIndicator(count: Int) -> some View {
         if count > 0 {
-            Text("\(min(currentPage + 1, count)) / \(count)")
+            let pct = Int((model.progressFraction * 100).rounded())
+            Text("\(min(currentPage + 1, count)) / \(count) · \(pct)%")
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 12)
@@ -119,6 +123,7 @@ struct PageModeView: View {
                 .opacity(chromeHidden ? 0 : 1)
                 .animation(.easeInOut(duration: 0.2), value: chromeHidden)
                 .allowsHitTesting(false)
+                .accessibilityIdentifier("reader.progress")
         }
     }
 
@@ -151,8 +156,8 @@ struct PageModeView: View {
             bookVersion: model.book.version,
             size: contentSize,
             dynamicTypeSize: dynamicTypeSize,
-            showTranslation: env.showTranslation,
-            translationLanguage: env.translationLanguage
+            displayMode: env.translationDisplay,
+            translationLanguage: env.effectiveLanguage(for: model.book)
         )
         let result = model.paginated(for: key)
         paginated = result

@@ -118,14 +118,32 @@ public struct MyTabView: View {
                 }
                 Divider().padding(.leading, 52)
                 QuotesSettingsRow(icon: "character.bubble", label: "번역 표시") {
-                    Toggle("", isOn: env.showTranslation)
-                        .labelsHidden()
-                        .tint(QuotesColor.accent)
+                    Menu {
+                        Picker("번역 표시", selection: env.translationDisplay) {
+                            ForEach(TranslationDisplayMode.allCases) { mode in
+                                Text(mode.displayName).tag(mode)
+                            }
+                        }
+                    } label: {
+                        Text(env.wrappedValue.translationDisplay.displayName)
+                            .foregroundStyle(QuotesColor.inkSecondary)
+                    }
                 }
                 Divider().padding(.leading, 52)
                 QuotesSettingsRow(icon: "globe", label: "번역 언어") {
-                    Text("한국어")
-                        .foregroundStyle(QuotesColor.inkSecondary)
+                    Menu {
+                        // v1-sample-only: global setting lists all languages;
+                        // the reader clamps per book. Future non-sample books
+                        // should filter via TranslationService.availableLanguages.
+                        Picker("번역 언어", selection: env.translationLanguage) {
+                            ForEach(AppEnvironment.allLanguageCodes, id: \.self) { code in
+                                Text(AppEnvironment.languageDisplayName(code)).tag(code)
+                            }
+                        }
+                    } label: {
+                        Text(AppEnvironment.languageDisplayName(env.wrappedValue.translationLanguage))
+                            .foregroundStyle(QuotesColor.inkSecondary)
+                    }
                 }
             }
         }

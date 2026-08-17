@@ -8,18 +8,18 @@ import SwiftUI
 public struct CaptureCardView: View {
     private let sentences: [Sentence]
     private let book: Book
-    private let showTranslation: Bool
+    private let displayMode: TranslationDisplayMode
     private let translationLanguage: String
 
     public init(
         sentences: [Sentence],
         book: Book,
-        showTranslation: Bool,
+        displayMode: TranslationDisplayMode,
         translationLanguage: String
     ) {
         self.sentences = sentences
         self.book = book
-        self.showTranslation = showTranslation
+        self.displayMode = displayMode
         self.translationLanguage = translationLanguage
     }
 
@@ -31,19 +31,24 @@ public struct CaptureCardView: View {
         sentences.compactMap { $0.translations[translationLanguage] }.joined(separator: " ")
     }
 
+    /// Translation-primary passage for 번역만, per-sentence fallback to original.
+    private var translationOnlyText: String {
+        sentences.map { $0.translations[translationLanguage] ?? $0.text }.joined(separator: " ")
+    }
+
     public var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             Image(systemName: "quote.opening")
                 .font(.title)
                 .foregroundStyle(.secondary)
 
-            Text(originalText)
+            Text(displayMode == .translationOnly ? translationOnlyText : originalText)
                 .font(ReaderStyle.cardOriginalFont)
                 .foregroundStyle(.primary)
                 .lineSpacing(ReaderStyle.paragraphLineSpacing)
                 .fixedSize(horizontal: false, vertical: true)
 
-            if showTranslation, !translatedText.isEmpty {
+            if displayMode == .interleave, !translatedText.isEmpty {
                 Text(translatedText)
                     .font(ReaderStyle.translationFont)
                     .foregroundStyle(.secondary)

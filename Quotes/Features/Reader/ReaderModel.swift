@@ -32,6 +32,13 @@ final class ReaderModel {
     private var chunkIdBySentence: [String: String] = [:]
     private var globalIndexBySentence: [String: Int] = [:]
 
+    // Carousel units (built once per load alongside the indexes). One logical
+    // unit per screen for the 문장/문단 carousels; no text measurement.
+    private(set) var sentenceUnits: [ReaderUnit] = []
+    private(set) var paragraphUnits: [ReaderUnit] = []
+    private var sentenceUnitIndexBySentence: [String: Int] = [:]
+    private var paragraphUnitIndexBySentence: [String: Int] = [:]
+
     // Reading-position tracking.
     private var visibleSentenceIds: Set<String> = []
     private var positionSaveTask: Task<Void, Never>?
@@ -86,6 +93,71 @@ final class ReaderModel {
         sentencesByChunk = byChunk
         chunkIdBySentence = chunkOf
         globalIndexBySentence = globalIndex
+        buildUnits(from: chunks)
+    }
+
+    /// Builds the 문장/문단 carousel units and their sentence→index maps. One
+    /// unit per sentence (문장) and per paragraph (문단); the owning chunk title
+    /// rides only on that chunk's first unit so it renders once at the top.
+    private func buildUnits(from chunks: [Chunk]) {
+        var sUnits: [ReaderUnit] = []
+        var pUnits: [ReaderUnit] = []
+        var sIndex: [String: Int] = [:]
+        var pIndex: [String: Int] = [:]
+
+        for chunk in chunks.sorted(by: { $0.order < $1.order }) {
+            let paragraphs = chunk.paragraphs.sorted { $0.order < $1.order }
+            var isFirstParagraphUnit = true
+            for paragraph in paragraphs {
+                let sentences = paragraph.sentences.sorted { $0.order < $1.order }
+                guard !sentences.isEmpty else { continue }
+                pUnits.append(ReaderUnit(
+                    id: paragraph.id,
+                    chunkId: chunk.id,
+                    title: isFirstParagraphUnit ? chunk.title : nil,
+                    sentences: sentences
+                ))
+                let pUnitIndex = pUnits.count - 1
+                for sentence in sentences { pIndex[sentence.id] = pUnitIndex }
+                isFirstParagraphUnit = false
+            }
+
+            let ordered = byChunkSentences(chunk.id)
+            for (i, sentence) in ordered.enumerated() {
+                sUnits.append(ReaderUnit(
+                    id: sentence.id,
+                    chunkId: chunk.id,
+                    title: i == 0 ? chunk.title : nil,
+                    sentences: [sentence]
+                ))
+                sIndex[sentence.id] = sUnits.count - 1
+            }
+        }
+
+        sentenceUnits = sUnits
+        paragraphUnits = pUnits
+        sentenceUnitIndexBySentence = sIndex
+        paragraphUnitIndexBySentence = pIndex
+    }
+
+    private func byChunkSentences(_ chunkId: String) -> [Sentence] {
+        sentencesByChunk[chunkId] ?? []
+    }
+
+    /// The carousel units for a granularity (built once per load).
+    func units(for granularity: ReaderUnitGranularity) -> [ReaderUnit] {
+        switch granularity {
+        case .sentence: return sentenceUnits
+        case .paragraph: return paragraphUnits
+        }
+    }
+
+    /// The index of the unit containing `sentenceId` for a granularity, if any.
+    func unitIndex(of sentenceId: String, granularity: ReaderUnitGranularity) -> Int? {
+        switch granularity {
+        case .sentence: return sentenceUnitIndexBySentence[sentenceId]
+        case .paragraph: return paragraphUnitIndexBySentence[sentenceId]
+        }
     }
 
     /// Chunks in reading order (paragraphs already sorted for rendering).
@@ -146,6 +218,11 @@ final class ReaderModel {
 
     // MARK: Reading position
 
+    /// Records a sentence entering/leaving the viewport in **이어보기 (continuous)**
+    /// mode only. The paged modes (문장/문단 carousels, 페이지) feed the reading
+    /// position exclusively through `notePagePosition(firstSentenceId:)`; they do
+    /// not call this. Kept continuous-only so `topmostVisibleSentenceId` reflects a
+    /// single scrolling surface.
     func noteVisibility(_ sentenceId: String, visible: Bool) {
         if visible {
             visibleSentenceIds.insert(sentenceId)
@@ -161,11 +238,11 @@ final class ReaderModel {
         }
     }
 
-    /// The sentence anchoring the current reading position. In page mode this is
-    /// the first sentence of the visible page; otherwise the topmost visible
-    /// sentence in the scroll view.
+    /// The sentence anchoring the current reading position. In paged modes
+    /// (문장/문단/페이지 carousels) this is the first sentence of the visible
+    /// page/unit; in 이어보기 it is the topmost visible sentence in the scroll view.
     var currentPositionSentenceId: String? {
-        if env?.viewMode == .page, let pageFirst = pageFirstSentenceId {
+        if env?.viewMode.isPaged == true, let pageFirst = pageFirstSentenceId {
             return pageFirst
         }
         return topmostVisibleSentenceId ?? pageFirstSentenceId

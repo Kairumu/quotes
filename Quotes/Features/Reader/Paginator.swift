@@ -42,7 +42,7 @@ struct LayoutKey: Hashable {
     let width: CGFloat
     let height: CGFloat
     let dynamicTypeSize: DynamicTypeSize
-    let showTranslation: Bool
+    let displayMode: TranslationDisplayMode
     let translationLanguage: String
 
     /// Quantise the size so sub-point jitter doesn't thrash the cache.
@@ -50,14 +50,14 @@ struct LayoutKey: Hashable {
         bookVersion: Int,
         size: CGSize,
         dynamicTypeSize: DynamicTypeSize,
-        showTranslation: Bool,
+        displayMode: TranslationDisplayMode,
         translationLanguage: String
     ) {
         self.bookVersion = bookVersion
         self.width = size.width.rounded()
         self.height = size.height.rounded()
         self.dynamicTypeSize = dynamicTypeSize
-        self.showTranslation = showTranslation
+        self.displayMode = displayMode
         self.translationLanguage = translationLanguage
     }
 
@@ -112,20 +112,41 @@ enum Paginator {
                 let h = measure(text, font: fonts.title, lineSpacing: 0, width: titleWidth)
                 return ReaderStyle.titleTopPadding + h + ReaderStyle.titleBottomPadding + blockSafetyMargin
             case .sentence(let sentence, _):
-                var h = measure(
-                    sentence.text,
-                    font: fonts.original,
-                    lineSpacing: ReaderStyle.lineSpacing,
-                    width: originalWidth
-                )
-                if key.showTranslation, let translation = sentence.translations[key.translationLanguage] {
-                    let th = measure(
-                        translation,
-                        font: fonts.translation,
+                let h: CGFloat
+                switch key.displayMode {
+                case .originalOnly:
+                    h = measure(
+                        sentence.text,
+                        font: fonts.original,
                         lineSpacing: ReaderStyle.lineSpacing,
-                        width: translationWidth
+                        width: originalWidth
                     )
-                    h += ReaderStyle.rowInternalSpacing + th
+                case .interleave:
+                    var acc = measure(
+                        sentence.text,
+                        font: fonts.original,
+                        lineSpacing: ReaderStyle.lineSpacing,
+                        width: originalWidth
+                    )
+                    if let translation = sentence.translations[key.translationLanguage] {
+                        let th = measure(
+                            translation,
+                            font: fonts.translation,
+                            lineSpacing: ReaderStyle.lineSpacing,
+                            width: translationWidth
+                        )
+                        acc += ReaderStyle.rowInternalSpacing + th
+                    }
+                    h = acc
+                case .translationOnly:
+                    // Byte-identical to the render path in `SentenceRowView`:
+                    // same fallback string, `fonts.original`, `originalWidth`.
+                    h = measure(
+                        sentence.translations[key.translationLanguage] ?? sentence.text,
+                        font: fonts.original,
+                        lineSpacing: ReaderStyle.lineSpacing,
+                        width: originalWidth
+                    )
                 }
                 return ReaderStyle.rowVerticalPadding * 2 + h + blockSafetyMargin
             }

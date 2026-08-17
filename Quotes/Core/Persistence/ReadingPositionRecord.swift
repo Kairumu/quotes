@@ -8,7 +8,10 @@ public final class ReadingPositionRecord {
     @Attribute(.unique) public var bookId: String
     public var chunkId: String
     public var sentenceId: String
-    /// Raw value of `ReaderViewMode`.
+    /// Raw value of `ReaderViewMode`. **Vestigial**: still written for record
+    /// compat, never read back to drive the reader mode (the global
+    /// `reader.viewMode` UserDefaults key is the single source of truth). Old
+    /// raws (`"sentence"`/`"paragraph"`/`"page"`) decode unchanged.
     public var viewModeRaw: String
     public var updatedAt: Date
 
@@ -38,14 +41,15 @@ public extension ReadingPositionRecord {
         )
     }
 
-    /// Map back to the domain `ReadingPosition`. Falls back to `.sentence` if
-    /// the persisted view mode is unrecognized.
+    /// Map back to the domain `ReadingPosition`. The `viewMode` is vestigial
+    /// (never consumed); the unknown-raw fallback of `.continuous` is defensive
+    /// only. `sentenceId` is the value that actually gets restored.
     func toDomain() -> ReadingPosition {
         ReadingPosition(
             bookId: bookId,
             chunkId: chunkId,
             sentenceId: sentenceId,
-            viewMode: ReaderViewMode(rawValue: viewModeRaw) ?? .sentence,
+            viewMode: ReaderViewMode(rawValue: viewModeRaw) ?? .continuous,
             updatedAt: updatedAt
         )
     }

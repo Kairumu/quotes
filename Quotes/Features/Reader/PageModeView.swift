@@ -92,7 +92,11 @@ struct PageModeView: View {
         }
         .scrollBounceBehavior(.basedOnSize)
         .contentShape(Rectangle())
-        .dragToSelect(model: model, selection: selection)
+        // NO dragToSelect here (same fix as UnitCarouselView): the
+        // long-press-then-drag gesture delays touch delivery to TabView's
+        // paging recognizer and swallows horizontal swipes. Selection in page
+        // mode is tap-based via SentenceRowView; full drag-select lives in
+        // 이어보기 (ContinuousModeView) only.
         .onTapGesture { toggleChrome() }
     }
 

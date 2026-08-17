@@ -125,9 +125,9 @@ final class ReaderModeSwitchingUITests: XCTestCase {
     /// 3. In 문장 mode, swipe left on the content area; assert the reader.progress
     ///    capsule label changes (sentinel that a new sentence was shown).
     ///
-    ///    The swipe is performed with a coordinate drag that avoids the 28 pt edge-tap
-    ///    zones on both sides. UITEST-HL anchors at b001-c002-p002-s002 (mid-book),
-    ///    so there is always a next sentence to advance to.
+    ///    Uses a real `swipeLeft()` — the user-facing gesture. UITEST-HL anchors
+    ///    at b001-c002-p002-s002 (mid-book), so there is always a next sentence
+    ///    to advance to.
     @MainActor
     func testSentenceModeSwipeAdvancesProgress() throws {
         let app = launchApp()
@@ -152,14 +152,11 @@ final class ReaderModeSwitchingUITests: XCTestCase {
         XCTAssertFalse(labelBefore.isEmpty, "reader.progress label is unexpectedly empty")
         attach(app, name: "문장 mode: before swipe — \(labelBefore)")
 
-        // Advance one sentence. The UnitCarouselView exposes two navigation paths:
-        // (a) horizontal swipe on the TabView — but the per-page .dragToSelect
-        //     gesture can win gesture arbitration in XCTest; and
-        // (b) the right-edge 28 pt tap zone that directly calls goToUnit(+1).
-        // Use the right-edge tap zone which is deterministic, then fall back to
-        // swipeLeft if the edge zone isn't hit (progress didn't change).
-        let rightEdge = app.coordinate(withNormalizedOffset: CGVector(dx: 0.99, dy: 0.45))
-        rightEdge.tap()
+        // Advance one sentence with a REAL horizontal swipe — this is the
+        // user-facing navigation path and the regression guard for the
+        // carousel-swallows-swipes bug (dragToSelect used to starve TabView's
+        // paging recognizer; it is intentionally absent from carousel pages).
+        app.swipeLeft(velocity: .fast)
         sleep(2)
 
         let labelAfter = app.staticTexts.matching(identifier: "reader.progress").firstMatch.label

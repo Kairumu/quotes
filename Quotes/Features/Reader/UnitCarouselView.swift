@@ -94,7 +94,12 @@ struct UnitCarouselView: View {
         }
         .scrollBounceBehavior(.basedOnSize)
         .contentShape(Rectangle())
-        .dragToSelect(model: model, selection: selection)
+        // NO dragToSelect here: the long-press-then-drag gesture delays touch
+        // delivery to TabView's paging recognizer and swallows horizontal
+        // swipes — pages stop flipping. In carousels, selection is tap-based
+        // (tap-select / tap-to-extend on rows and chips), which already covers
+        // the on-screen-unit selection scope; full drag-select lives in
+        // 이어보기 (ContinuousModeView) only.
         .onTapGesture { toggleChrome() }
     }
 
